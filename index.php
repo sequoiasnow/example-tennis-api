@@ -1,5 +1,6 @@
 <?php
 require 'includes.php';
+require 'functions.php';
 require 'database/database.php';
 require 'content/content_type.php';
 require 'content/all.php';

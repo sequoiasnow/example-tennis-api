@@ -52,11 +52,9 @@ interface ApiRetrievable {
      * minimum ot delcare a instance, it may also involve the creation, or
      * linking of other content types in order to fully involve the process.
      *
-     * @param array $data
-     *
      * @return ApiRetrievable
      */
-    public static function create( $data );
+    public function create();
 
     /**
      * As the functionality of a search is carried out by the parent method,
