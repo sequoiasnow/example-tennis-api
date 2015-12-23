@@ -36,9 +36,9 @@ class ApiDataSet implements ApiRetrievable {
     public static function getAvailableReturns() {
         return array(
             array(
-                'arugment_count' => 3,
+                'argument_count' => 3,
                 'url_name'       => 'filterby',
-                'method_name'    => 'filerBy',
+                'method_name'    => 'filterBy',
                 'request_types'  => array( 'GET' ),
                 'return_type'    => ':self',
             ),
@@ -48,6 +48,7 @@ class ApiDataSet implements ApiRetrievable {
                 'method_name'    => 'first',
                 'request_types'  => array( 'GET' ),
                 'return_type'    => ':self',
+                'return_set'     => false,
             ),
             array(
                 'argument_count' => 0,
@@ -55,6 +56,7 @@ class ApiDataSet implements ApiRetrievable {
                 'method_name'    => 'last',
                 'request_types'  => array( 'GET' ),
                 'return_type'    => ':self',
+                'return_set'     => false,
             ),
             array(
                 'argument_count' => 2,
@@ -78,11 +80,9 @@ class ApiDataSet implements ApiRetrievable {
     /**
      * Implements ApiRetrievable::create
      *
-     * @param array $data
-     *
      * @return ApiRetrievable
      */
-    public function create( $data ) {
+    public function create() {
         $contentType = $this->contentType;
         $return      = array();
 
@@ -105,7 +105,7 @@ class ApiDataSet implements ApiRetrievable {
 
         foreach ( $this->data as $raw ) {
             $object   = new $contentType( $raw );
-            $return[] = $object->update();
+            $return[] = $object->get();
         }
 
         return $return;
@@ -175,17 +175,17 @@ class ApiDataSet implements ApiRetrievable {
      *
      * @return ContentMultiple
      */
-    public function filerBy( $what, $how, $where ) {
+    public function filterBy( $what, $how, $where ) {
         $fullData = $this->data;
         $finnal   = array();
 
         // Iterate through to look for viable instances.
         foreach ( $fullData as $instance ) {
-            if ( isset( $instance[$what] ) ) {
+            if ( isset( $instance->$what ) ) {
                 // Check the where conditions.
                 switch ( $how ) {
                     case '=':
-                        if ( $instance[$what] == $where ) {
+                        if ( $instance->$what == $where ) {
                             $finnal[] = $instance;
                         }
                         break;
@@ -205,19 +205,23 @@ class ApiDataSet implements ApiRetrievable {
      * @return array
      */
     public function orderBy( $what, $how ) {
-        return uasort( $this->data, function( $af, $bf ) {
-            if ( ! isset( $af[$what] ) ) { return -1 * $order; }
+        $order = $how == 'ASC' ? 1 : -1;
 
-            if ( ! isset( $bf[$what] ) ) { return 1 * $order; }
+        $data = $this->data;
+        usort( $data, function( $af, $bf ) use( $what, $order ) {
+            if ( ! isset( $af->$what ) ) { return -1 * $order; }
+
+            if ( ! isset( $bf->$what ) ) { return 1 * $order; }
 
 
-            $a = $af[$what];
-            $b = $bf[$what];
+            $a = $af->$what;
+            $b = $bf->$what;
 
             if ( $a == $b ) { return 0; }
 
             return $order * ( $a < $b ? -1 : 1 );
         });
+        return $data;
     }
 
     /**
@@ -235,6 +239,6 @@ class ApiDataSet implements ApiRetrievable {
      * @return array
      */
     public function last() {
-        return $this->data[count($this->dataw) - 1];
+        return $this->data[count($this->data) - 1];
     }
 }

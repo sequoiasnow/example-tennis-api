@@ -58,8 +58,8 @@ class Api {
 
             if ( ! class_exists( $contentType ) ) {
                 new Error( array(
-                    'type'     => Error:Fatal,
-                    'message' => 'Content Type not found or does not exist.'.
+                    'type'     => Error::Fatal,
+                    'message' => 'Content Type not found or does not exist.',
                 ) );
             }
 
@@ -87,7 +87,7 @@ class Api {
              is_numeric( $this->pathComponents[1] )) {
             // Querying for a specific instance, not a set.
             $id     = $this->pathComponents[1];
-            $object = new $contentType::getInstance( $id );
+            $object = $contentType::getInstance( $id );
 
             // Set the curretn pointer to the number of components used.
             $this->componentIndex = 2;
@@ -126,7 +126,7 @@ class Api {
                 $contentType = $set->contentType;
             }
 
-            return new $contentType::getInstance( $compVal );
+            return $this->processSet( $contentType::getInstance( $compVal ) );
         }
 
         // Call the acceptable functions.
@@ -150,10 +150,12 @@ class Api {
 
             // First iteration throuh the component index is moved to the
             // next argument.
+            $this->componentIndex++;
             while ( $this->componentIndex < count( $this->pathComponents ) &&
-                    $iterations++ < $method[ 'argument_count' ] ) {
-                $arguments[] = $this->pathComponents[++$this->componentIndex];
+                    $iterations++ < $usedFunc[ 'argument_count' ] ) {
+                $arguments[] = $this->pathComponents[$this->componentIndex++];
             }
+
 
             $result = call_user_method_array( $method, $set, $arguments );
 
@@ -171,21 +173,23 @@ class Api {
                 }
             }
 
-            if ( isset( $userFunc['return_set'] ) &&
-                 ! $userFunc['return_set'] ) {
+            if ( isset( $usedFunc['return_set'] ) &&
+                 ! $usedFunc['return_set'] ) {
                 // Return an instance of the return type not a set.
                 return $this->processSet(
-                    new $returnType( $result );
+                    new $returnType( $result )
                 );
             }
 
             // Turn the result into a new data set. Send this set to be
             // processed.
             return $this->processSet(
-                new ApiDataSet( $returnType, $result );
+                new ApiDataSet( $returnType, $result )
             );
         } else {
-            return $set;
+            return call_user_method( $this->requestType,
+                                     $set,
+                                     $this->requestData );
         }
     }
 
@@ -215,10 +219,10 @@ class Api {
      * @return string
      */
     public function __toString() {
-        if ( is_array( $this->returnData ) ) {
-            return json_encode( $this->returnData );
+        if ( is_string( $this->returnData ) ) {
+            return $this->returnData;
         }
 
-        return $this->returnData;
+        return json_encode( $this->returnData );
     }
 }
