@@ -1,0 +1,7 @@
+DROP TABLE IF EXISTS members;
+CREATE TABLE members (
+    id INT(11) NOT NULL AUTO_INCREMENT,
+    name VARCHAR(150) NOT NULL,
+    age INT(4),
+    PRIMARY KEY(id)
+);
