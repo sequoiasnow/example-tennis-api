@@ -9,6 +9,9 @@
  * callback functionality for the purpose of ending transactions.
  */
 class Error {
+    /// Usef for fatal error, all has gone wrong.
+    const Fatal = 0;
+
     /**
      * Instantiates a new instance of the Error class with the arguments
      * indicative of what type of error and a callback to close the transaction.

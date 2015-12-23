@@ -24,6 +24,28 @@ interface ApiRetrievable {
      */
     public static function getAvailableReturns();
 
+
+
+    /**
+     * Returns an instance based off of an id. The id is the one common
+     * demoninator among all Content Types.
+     *
+     * @param int $id
+     *
+     * @return self
+     */
+    public static function getInstance( $id );
+
+    /**
+     * Returns all instances of self. Will return an array of instantiated
+     * instances of self. This functionality is largelly limited to the
+     * ApiDataSet retreival of multiple content types, though it can be
+     * otherwise employeed.
+     *
+     * @return [self]
+     */
+    public static function getAllInstances();
+
     /**
      * Returns the authorization level of the various methods accessible through
      * the api.
